@@ -65,16 +65,23 @@ df_teams.sort_values(['total', 'team'], ascending=[False, True], inplace=True, i
 
 
 
+_, won, lost, incomplete, total = df_teams.sum().values
+
+won = int(won)
+lost = int(lost)
+incomplete = int(incomplete)
+
+
 fig, axs = plt.subplots(int(len(team_set)/2), 2, figsize = (8, 70))
 
 for index, row in df_teams.iterrows():
-    # row.plot(kind='pie', ax=axs[index])
+
     absv = lambda v: absval(v, row)
     axs[index//2][index%2].pie(row.loc[['won', 'lost', 'incomplete']],
                                  colors=['cornflowerblue', 'darkorange', 'silver'],
                                  autopct=absv, pctdistance=0.5,
                                  textprops={'family': "serif", 'size':'large'})
-    # axs[index].set_ylabel(row.loc[['team']].values[0])
+
     axs[index//2][index%2].text(-0.01, 0.5, row.loc[['team']].values[0], va='center', 
                     ha='right', fontsize=15,transform=axs[index//2][index%2].transAxes,
                     fontname="serif")
@@ -82,8 +89,12 @@ for index, row in df_teams.iterrows():
 fig.legend(labels=['won', 'lost', 'incomplete'], loc=8, ncol=3,
              prop={'family': "serif", 'size':'xx-large', 'weight': 'bold'})
 
-# plt.savefig('mets-2022-teams.jpg')
+
 fig.suptitle('Mets Current Season Series Results \n 5/31/2022', fontname="serif",
             weight='bold', size=25, y=0.95)
+
+record_str = f"Record: {won}-{lost}, {incomplete} Games Remaining"
+fig.text(0.5, 0.07, record_str, horizontalalignment='center',
+         weight='bold', size=20, fontname='serif')
 plt.show()
 
