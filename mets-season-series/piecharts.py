@@ -2,6 +2,8 @@ import statsapi as mlbstats
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import pybaseball as pbb
+from datetime import date
 
 
 
@@ -73,6 +75,8 @@ def absval(v, row):
     else:
         return val
 
+standings = pd.concat(pbb.standings(), ignore_index=True)
+
 
 fig, axs = plt.subplots(int(len(team_set)/2), 2, figsize = (8, 70))
 
@@ -81,10 +85,13 @@ for index, row in df_teams.iterrows():
     absv = lambda v: absval(v, row)
     axs[index//2][index%2].pie(row.loc[['won', 'lost', 'incomplete']],
                                  colors=['cornflowerblue', 'darkorange', 'silver'],
-                                 autopct=absv, pctdistance=0.6*played_yet,
-                                 textprops={'family': "serif", 'size':'large'})
+                                 autopct=absv, pctdistance=0.5*played_yet,
+                                 textprops={'family': "serif", 'size':'x-large'},
+                                 radius=1.4)
 
-    axs[index//2][index%2].text(-0.01, 0.5, row.loc[['team']].values[0], va='center', 
+    team_rec = f"{standings.loc[standings['Tm']==row.loc[['team']].values[0],['W']].values[0][0]} - {standings.loc[standings['Tm']==row.loc[['team']].values[0],['L']].values[0][0]} "
+
+    axs[index//2][index%2].text(-0.01, 0.5, f"{row.loc[['team']].values[0]} \n{team_rec}", va='center', 
                     ha='right', fontsize=15,transform=axs[index//2][index%2].transAxes,
                     fontname="serif")
 
@@ -92,7 +99,7 @@ fig.legend(labels=['won', 'lost', 'incomplete'], loc=8, ncol=3,
              prop={'family': "serif", 'size':'xx-large', 'weight': 'bold'})
 
 
-fig.suptitle('Mets Current Season Series Results \n 5/31/2022', fontname="serif",
+fig.suptitle(f'Mets Current Season Series Results\n{date.today()}', fontname="serif",
             weight='bold', size=25, y=0.95)
 
 record_str = f"Record: {won}-{lost}, {incomplete} Games Remaining"
