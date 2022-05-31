@@ -2,7 +2,6 @@ import statsapi as mlbstats
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 
@@ -82,7 +81,7 @@ for index, row in df_teams.iterrows():
     absv = lambda v: absval(v, row)
     axs[index//2][index%2].pie(row.loc[['won', 'lost', 'incomplete']],
                                  colors=['cornflowerblue', 'darkorange', 'silver'],
-                                 autopct=absv, pctdistance=0.5*played_yet,
+                                 autopct=absv, pctdistance=0.6*played_yet,
                                  textprops={'family': "serif", 'size':'large'})
 
     axs[index//2][index%2].text(-0.01, 0.5, row.loc[['team']].values[0], va='center', 
