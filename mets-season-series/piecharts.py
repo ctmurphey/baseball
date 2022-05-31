@@ -78,11 +78,11 @@ def absval(v, row):
 fig, axs = plt.subplots(int(len(team_set)/2), 2, figsize = (8, 70))
 
 for index, row in df_teams.iterrows():
-
+    played_yet = (row.loc[['incomplete']].values[0] != row.loc[['total']].values[0])
     absv = lambda v: absval(v, row)
     axs[index//2][index%2].pie(row.loc[['won', 'lost', 'incomplete']],
                                  colors=['cornflowerblue', 'darkorange', 'silver'],
-                                 autopct=absv, pctdistance=0.5,
+                                 autopct=absv, pctdistance=0.5*played_yet,
                                  textprops={'family': "serif", 'size':'large'})
 
     axs[index//2][index%2].text(-0.01, 0.5, row.loc[['team']].values[0], va='center', 
