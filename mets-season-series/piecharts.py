@@ -10,14 +10,12 @@ df_sch = pd.read_csv('mets_2022.csv')
 df_sch.pop('Unnamed: 0')
 
 
-df_sch = pd.DataFrame(df_sch.loc[df_sch['status'] != 'Postponed'])
-df_sch = pd.DataFrame(df_sch.loc[df_sch['game_type'] != 'S'])
 
 
-other_team = []
+other_team = [] # list of other teams played
 
 for index, row in df_sch.iterrows():
-    # print(row[['home_name', 'away_name']])
+
     if row['home_id'] == 121:
         other_team.append(row['away_name'])
     else:
@@ -27,7 +25,7 @@ df_sch['other_team'] = other_team
 
 
 
-team_set = set(other_team)
+team_set = set(other_team) #only want unique values of other teams
 
 df_teams = pd.DataFrame({'team': [t for t in team_set]})
 
@@ -39,19 +37,14 @@ df_teams['total'] = np.zeros(len(team_set))
 
 
 
-def absval(v, row):
-    val = int(v*row.loc[['total']][0]/100)
-    if val == 0:
-        return ""
-    else:
-        return val
 
+### Not optimal method, should optimize to list comprehension in future version
 for index, row in df_sch.iterrows():
     if row['status'] == 'Scheduled':
         df_teams.loc[df_teams['team']==row['other_team'], ['incomplete']] += 1
 
     elif row['winning_team'] == 'New York Mets':
-         df_teams.loc[df_teams['team']==row['other_team'], ['won']] += 1
+        df_teams.loc[df_teams['team']==row['other_team'], ['won']] += 1
 
     else:
         df_teams.loc[df_teams['team']==row['other_team'], ['lost']] += 1    
@@ -67,9 +60,19 @@ df_teams.sort_values(['total', 'team'], ascending=[False, True], inplace=True, i
 
 _, won, lost, incomplete, total = df_teams.sum().values
 
-won = int(won)
-lost = int(lost)
-incomplete = int(incomplete)
+won = round(won)
+lost = round(lost)
+incomplete = round(incomplete)
+
+
+
+def absval(v, row):
+    '''Scales the normalized fractions to values for the pie charts'''
+    val = round(v*row.loc[['total']][0]/100)
+    if val == 0:
+        return ""
+    else:
+        return val
 
 
 fig, axs = plt.subplots(int(len(team_set)/2), 2, figsize = (8, 70))
