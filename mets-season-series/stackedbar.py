@@ -87,7 +87,7 @@ x = np.arange(len(team_set))
 
 wins       = ax.barh(x, df_teams['won'], w, label='won', color='cornflowerblue')
 losses     = ax.barh(x, df_teams['lost'], w, left=df_teams['won'], label='lost', color='darkorange')
-incomplete = ax.barh(x-w/4, df_teams['incomplete'], w/2, 
+incomp = ax.barh(x-w/4, df_teams['incomplete'], w/2, 
                     left=df_teams['won']+df_teams['lost'], label="incomplete total", color='silver')
 
 home       = ax.barh(x+w/4, df_teams['inc_home'], w/2, left=df_teams['won']+df_teams['lost'],
@@ -123,6 +123,8 @@ for index, row in df_teams.iterrows():
                 weight='bold', va='center', ha='center',
                 size=9, fontname='serif')
 
+fig.text(0.7, 0.3, f"Record: {won}-{lost}\n{incomplete} Games Remaining",
+         ha='center', weight='bold', size=20, fontname='serif')
 
 ax.set_ylim(min(x)-w/2, max(x)+w/2)
 ax.invert_yaxis()
