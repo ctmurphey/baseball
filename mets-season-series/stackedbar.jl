@@ -1,14 +1,40 @@
 using DataFrames, PyCall, CSV, StatsPlots
 
+main_team = "New York Mets"
+
+
 julia_df = CSV.read("mets_2022.csv", DataFrame)
 
 select!(julia_df, [:game_date, :status, :away_name, :home_name,
                          :winning_team])
 
-# show(julia_df)
 
-# println(names(julia_df))
+# Really want to find a way to vectorize this block
+other_team = []
+for row in eachrow(julia_df)
+    if row[:home_name] == main_team
+        push!(other_team, row[:away_name])
+    else 
+        push!(other_team, row[:home_name])
+    end
+end
 
-grp = groupby(julia_df, "winning_team")
-# println(grp)
 
+julia_df[!, :other_team] = other_team
+
+
+teams = DataFrame(team=unique(other_team))
+
+
+
+teams.total = [count(i->(i == team.team), julia_df[:, :other_team]) for team in eachrow(teams)]
+teams.won   = [count(i->(i.other_team == team.team && i.winning_team==main_team), eachrow(dropmissing(julia_df[:, [:other_team, :winning_team]]))) for team in eachrow(teams)]
+teams.lost  = [count(i->(i.other_team == team.team && i.winning_team==team.team), eachrow(dropmissing(julia_df[:, [:other_team, :winning_team]]))) for team in eachrow(teams)]
+
+teams.incomplete = [count(i->(i.other_team == team.team && i.status=="Scheduled"), eachrow(julia_df[:, [:other_team, :status]])) for team in eachrow(teams)]
+teams.inc_home   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.home_name==main_team), eachrow(julia_df[:, [:other_team, :status, :home_name]])) for team in eachrow(teams)]
+teams.inc_away   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.away_name==main_team), eachrow(julia_df[:, [:other_team, :status, :away_name]])) for team in eachrow(teams)]
+
+
+
+show(teams)
