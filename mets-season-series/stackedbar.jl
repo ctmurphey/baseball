@@ -9,22 +9,10 @@ select!(julia_df, [:game_date, :status, :away_name, :home_name,
                          :winning_team])
 
 
-# Really want to find a way to vectorize this block
-other_team = []
-for row in eachrow(julia_df)
-    if row[:home_name] == main_team
-        push!(other_team, row[:away_name])
-    else 
-        push!(other_team, row[:home_name])
-    end
-end
+julia_df[!, :other_team] = [(row[:home_name]==main_team) ? row[:away_name] : row[:home_name] for row in eachrow(julia_df)]
 
 
-julia_df[!, :other_team] = other_team
-
-
-teams = DataFrame(team=unique(other_team))
-
+teams = DataFrame(team=unique(julia_df[!, :other_team]))
 
 
 teams.total = [count(i->(i == team.team), julia_df[:, :other_team]) for team in eachrow(teams)]
@@ -42,8 +30,8 @@ teams.incomplete_away   = [count(i->(i.other_team == team.team && i.status=="Sch
 
 sort!(teams, [:total, :team], rev=[false, true])
 
-show(teams)
-
+# show(teams)
+show(julia_df)
 
 PlotlyJS.plot(
     [PlotlyJS.bar(teams, x=y, y=:team, text=y, textangle=0, 
