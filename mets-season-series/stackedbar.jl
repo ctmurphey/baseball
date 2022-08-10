@@ -35,19 +35,18 @@ teams.lost  = [count(i->(i.other_team == team.team && i.winning_team==team.team)
 
 teams.incomplete = [count(i->(i.other_team == team.team && i.status=="Scheduled"), 
                     eachrow(julia_df[:, [:other_team, :status]])) for team in eachrow(teams)]
-teams.inc_home   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.home_name==main_team),
+teams.incomplete_home   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.home_name==main_team),
                      eachrow(julia_df[:, [:other_team, :status, :home_name]])) for team in eachrow(teams)]
-teams.inc_away   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.away_name==main_team), 
+teams.incomplete_away   = [count(i->(i.other_team == team.team && i.status=="Scheduled" && i.away_name==main_team), 
                     eachrow(julia_df[:, [:other_team, :status, :away_name]])) for team in eachrow(teams)]
 
 sort!(teams, [:total, :team], rev=[false, true])
 
 show(teams)
 
-color_vec = ["blue", "orange", "lightgray", "darkgray"]
 
 PlotlyJS.plot(
-    [PlotlyJS.bar(teams, x=y, y=:team, text=y, textangle=90, name=String(y), orientation="h" 
-    ) for y in [:won, :lost, :inc_home, :inc_away]],
+    [PlotlyJS.bar(teams, x=y, y=:team, text=y, textangle=0, 
+    name=String(y), orientation="h" ) for y in [:won, :lost, :incomplete_home, :incomplete_away]],
     Layout(title="Mets Current Season Series Results", barmode="stack")
 )
