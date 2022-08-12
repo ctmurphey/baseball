@@ -1,4 +1,4 @@
-using DataFrames, PyCall, CSV, PlotlyJS
+using DataFrames, CSV, PlotlyJS, Dates
 
 main_team = "New York Mets"
 
@@ -31,10 +31,10 @@ teams.incomplete_away   = [count(i->(i.other_team == team.team && i.status=="Sch
 #Sort the teams consistently
 sort!(teams, [:total, :team], rev=[false, true])
 
-
+title = "Mets Current Season Series Results: " * string(today())
 ### make the stacked bar graphs
 PlotlyJS.plot(
     [PlotlyJS.bar(teams, x=y, y=:team, text=y, textangle=0, 
     name=String(y), orientation="h" ) for y in [:won, :lost, :incomplete_home, :incomplete_away]],
-    Layout(title="Mets Current Season Series Results", barmode="stack")
+    Layout(title=title, barmode="stack")
 )
