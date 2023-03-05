@@ -1,4 +1,4 @@
-import statsapi as mlbstats
+# import statsapi as mlbstats
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ from datetime import date
 
 
 
-df_sch = pd.read_csv('mets_2022.csv')
+df_sch = pd.read_csv('mets_2023.csv')
 df_sch.pop('Unnamed: 0')
 
 
@@ -62,10 +62,20 @@ for index, row in df_sch.iterrows():
 
 
 standings = pd.concat(pbb.standings(), ignore_index=True)
-team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-{standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
+try:
+    team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-{standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
+except:
+    team_rec = ["0-0" for team in df_teams['team']]
 
 
-df_teams['team'] = [f"{t.split()[-1]} ({team_rec[i]})" for i,t in enumerate(df_teams['team'])]
+nicknames = []
+for i,t in enumerate(df_teams['team']):
+    if t.split()[-1] == "Sox": #Accounting for Boston/Chicago
+        nicknames.append(f"{t.split()[-2]+ ' ' + t.split()[-1] } ({team_rec[i]})")
+    else:
+        nicknames.append(f"{t.split()[-1]} ({team_rec[i]})")
+df_teams['team'] = nicknames
+
 df_teams.sort_values(['total', 'team'], ascending=[False, True], inplace=True, ignore_index=True)
 
 
@@ -83,7 +93,7 @@ incomplete_away = round(inc_away)
 
 
 # fig, ax= plt.subplots(figsize=(25, 25), nrows=2, ncols=1, gridspec_kw={'height_ratios': [5, 1]})
-fig, ax= plt.subplots(nrows=2, ncols=1, gridspec_kw={'height_ratios': [15, 1]})
+fig, ax= plt.subplots(nrows=2, ncols=1, gridspec_kw={'height_ratios': [30, 1]})
 
 w = 0.9 #main bar width
 x = np.arange(len(team_set))
@@ -93,8 +103,7 @@ wins       = ax[0].barh(x, df_teams['won'], w, label='won',
                      color="cornflowerblue", edgecolor='k')
 losses     = ax[0].barh(x, df_teams['lost'], w, left=df_teams['won'],
                      label='lost', color="darkorange", edgecolor='k')
-# incomp = ax.barh(x-w/4, df_teams['incomplete'], w/2, 
-#                     left=df_teams['won']+df_teams['lost'], label="incomplete total", color='silver')
+
 
 home       = ax[0].barh(x, df_teams['inc_home'], w, left=df_teams['won']+df_teams['lost'],
                      label="incomplete home", color='silver', edgecolor='k')
@@ -167,10 +176,13 @@ ax[0].set_xticks(range(0, 21, 5), fontfamily='serif', minor=False)
 ax[0].set_xticks(range(0, 21, 1), fontfamily='serif', minor=True)
 ax[0].tick_params('x', labelsize='large')
 ax[0].set_yticks(ticks = x, labels=df_teams['team'], size=18, fontfamily='serif')
-ax[0].set_xlim(0, 20)
+ax[0].set_xlim(0, df_teams['total'].max())
 ax[0].legend(labels=['won', 'lost', 'incomplete home', 'incomplete away'],
           loc=4, ncol=1, prop={'family': "serif", 'size':'x-large', 'weight': 'bold'})
 
 fig.suptitle(f"Mets Current Season Series Progress\n{date.today()} ({won}-{lost}, {incomplete} GR)", size=24, weight='bold',
              fontname='serif', y=0.9, va='bottom')
+
+fig.tight_layout()
+plt.savefig("test.png")
 plt.show()
