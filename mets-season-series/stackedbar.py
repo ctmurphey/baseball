@@ -5,14 +5,13 @@ import matplotlib.pyplot as plt
 import pybaseball as pbb
 from datetime import date
 from matplotlib import gridspec
+from matplotlib import gridspec
 
 
 
 
 df_sch = pd.read_csv('mets_2023.csv')
-df_sch.pop('Unnamed: 0')
-
-
+df_sch.pop('Unnamed: 0') #artifact from saving csv in other code
 
 
 other_team = [] # list of other teams played
@@ -70,14 +69,16 @@ except:
     team_rec = ["0-0" for team in df_teams['team']]
 
 
-nicknames = []
+nicknames = [] ## Adding city names crowds up the labels too much
 for i,t in enumerate(df_teams['team']):
+    if t.split()[-1] == "Sox": #Accounting for Boston/Chicago Sox
     if t.split()[-1] == "Sox": #Accounting for Boston/Chicago Sox
         nicknames.append(f"{t.split()[-2]+ ' ' + t.split()[-1] } ({team_rec[i]})")
     else:
         nicknames.append(f"{t.split()[-1]} ({team_rec[i]})")
 df_teams['team'] = nicknames
 
+### Order for the teams to be plotted in, consistent throughout the season
 df_teams.sort_values(['total', 'team'], ascending=[False, True], inplace=True, ignore_index=True)
 
 
@@ -91,110 +92,105 @@ incomplete_home = round(inc_home)
 incomplete_away = round(inc_away)
 
 
+### Trying new way due to 50% more teams:
+fig = plt.figure(tight_layout=True)
+gs = gridspec.GridSpec(2, 2, height_ratios=[1,12])
 
-###
-
-
-# fig, ax= plt.subplots(figsize=(25, 25), nrows=2, ncols=1, gridspec_kw={'height_ratios': [5, 1]})
-fig, ax= plt.subplots(nrows=2, ncols=2, gridspec_kw={'height_ratios': [15, 1]})
-ax[1,1].remove()
 w = 0.9 #main bar width
 x = [np.arange(15), np.arange(14)]
 
-for i in range(2):
-    wins       = ax[0,i].barh(x[i], df_teams['won'][i::2], w, label='won',
+
+### Total season progress bar:
+ax = fig.add_subplot(gs[0, :])
+
+if won != 0:
+    wins   = ax.barh(0, won, w, label='won',
                         color="cornflowerblue", edgecolor='k')
-    losses     = ax[0,i].barh(x[i], df_teams['lost'][i::2], w, left=df_teams['won'][i::2],
+    ax.text(won/2, 0, round(won) ,weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+if lost != 0:
+    losses = ax.barh(0, lost, w, left=won,
                         label='lost', color="darkorange", edgecolor='k')
-
-
-    home       = ax[0,i].barh(x[i], df_teams['inc_home'][i::2], w, left=df_teams['won'][i::2]+df_teams['lost'][i::2],
+    ax.text(won+lost/2, 0, round(lost), weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+if inc_home != 0:
+    home   = ax.barh(0, inc_home, w, left=won+lost,
                         label="incomplete home", color='silver', edgecolor='k')
-    away       = ax[0,i].barh(x[i], df_teams['inc_away'][i::2], w, left=df_teams['won'][i::2]+df_teams['lost'][i::2] + df_teams['inc_home'][i::2],
+    ax.text(won+lost+inc_home/2, 0, round(inc_home),
+                    weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+
+if inc_away != 0:
+    away   = ax.barh(0, inc_away, w, left=won+lost+inc_home,
                         label="incomplete away", color='k', edgecolor='k')
+    ax.text(won+lost+inc_home+inc_away/2, 0, round(inc_away),
+                    weight='bold', va='center', ha='center', color='w',
+                    size=18, fontname='serif')
 
-for index, row in df_teams.iterrows():
-    # print(row)
-    # So we ignore when one of the totals equals zero
-    if round(row['won']) != 0:
-        ax[0,index%2].text(row['won']/2, x[0,index//2], int(row['won']),
-                weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-    
-    if round(row['lost']) != 0:
-        ax[0,index%2].text(row['won']+row['lost']/2, x[0,index//2], int(row['lost']),
-                weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-
-    if round(row['inc_home']) != 0:
-        ax[0,index%2].text(row['won']+row['lost']+row['inc_home']/2,
-                x[0][index//2], int(row['inc_home']),
-                weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-
-    if round(row['inc_away']) != 0:
-        ax[0,index%2].text(row['won']+row['lost']+row['inc_home']+row['inc_away']/2,
-                x[0][index//2], int(row['inc_away']),
-                weight='bold', va='center', ha='center', color='w',
-                size=18, fontname='serif')
-    
-
-
-###total season bar
-
-wins       = ax[1,0].barh(0, won, w, label='won',
-                     color="cornflowerblue", edgecolor='k')
-ax[1,0].text(won/2, 0, round(won) ,weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-
-losses     = ax[1,0].barh(0, lost, w, left=won,
-                     label='lost', color="darkorange", edgecolor='k')
-ax[1,0].text(won+lost/2, 0, round(lost), weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-
-home       = ax[1,0].barh(0, inc_home, w, left=won+lost,
-                     label="incomplete home", color='silver', edgecolor='k')
-ax[1,0].text(won+lost+inc_home/2, 0, round(inc_home),
-                weight='bold', va='center', ha='center',
-                size=18, fontname='serif')
-
-away       = ax[1,0].barh(0, inc_away, w, left=won+lost+inc_home,
-                     label="incomplete away", color='k', edgecolor='k')
-ax[1,0].text(won+lost+inc_home+inc_away/2, 0, round(inc_away),
-                weight='bold', va='center', ha='center', color='w',
-                size=18, fontname='serif')
-
-ax[1,0].axis('off')
-ax[1,0].set_title('Total Season:', size=20, weight='bold',
+ax.axis('off')
+ax.set_title('Total Season:', size=20, weight='bold',
              fontname='serif')
 
-ax[1,0].set_xlim(0, 162)
-###End edits
-
-#Graph styling:
+ax.set_xlim(0, 162)
 
 
 
-# ax[0,0].grid(axis='x', which='major', linewidth=2)
+### Individual team progress bars, broken into two plots
 for i in range(2):
-    ax[0,i].set_ylim(min(x[0])-w/2, max(x[0])+w/2)
-    ax[0,i].invert_yaxis()
-    ax[0,i].set_xticks(range(0, 21, 5), fontfamily='serif', minor=False)
-    ax[0,i].set_xticks(range(0, 21, 1), fontfamily='serif', minor=True)
-    ax[0,i].tick_params('x', labelsize='large')
-    ax[0,i].set_yticks(ticks = x[i], labels=df_teams['team'][i::2], size=18, fontfamily='serif')
-    ax[0,i].set_xlim(0, df_teams['total'].max())
-ax[0,0].legend(labels=['won', 'lost', 'incomplete home', 'incomplete away'],
-          loc=4, ncol=1, prop={'family': "serif", 'size':'x-large', 'weight': 'bold'})
+    ax = fig.add_subplot(gs[1, i])
+    wins       = ax.barh(x[i], df_teams['won'][i::2], w, label='won',
+                        color="cornflowerblue", edgecolor='k')
+    
+    losses     = ax.barh(x[i], df_teams['lost'][i::2], w, left=df_teams['won'][i::2],
+                        label='lost', color="darkorange", edgecolor='k')
 
-fig.suptitle(f"Mets Current Season Series Progress\n{date.today()} ({won}-{lost}, {incomplete} GR)", size=24, weight='bold',
-             fontname='serif', y=0.9, va='bottom')
-plt.subplots_adjust(wspace=0.5, right=0.995, left=0.21)
+    home       = ax.barh(x[i], df_teams['inc_home'][i::2], w,
+                          left=df_teams['won'][i::2]+df_teams['lost'][i::2],
+                        label="incomplete home", color='silver', edgecolor='k')
+    
+    away       = ax.barh(x[i], df_teams['inc_away'][i::2], w, 
+                         left=df_teams['won'][i::2]+df_teams['lost'][i::2] + df_teams['inc_home'][i::2],
+                        label="incomplete away", color='k', edgecolor='k')
+    
+
+    for j in x[i]: 
+        if wins.datavalues[j] != 0: #Ignore values that are currently 0
+            ax.text(wins.datavalues[j]/2, x[i][j], int(wins.datavalues[j]), 
+                    weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+            
+        if losses.datavalues[j] != 0:
+            ax.text(wins.datavalues[j] + losses.datavalues[i]/2, x[i][j], int(losses.datavalues[j]), 
+                    weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+            
+        if home.datavalues[j] != 0:
+            ax.text(wins.datavalues[j] + losses.datavalues[j] + home.datavalues[j]/2, x[i][j], int(home.datavalues[j]), 
+                    weight='bold', va='center', ha='center',
+                    size=18, fontname='serif')
+            
+        if away.datavalues[j] != 0:
+            ax.text(wins.datavalues[j] + losses.datavalues[j] + home.datavalues[j] + away.datavalues[j]/2, x[i][j], int(away.datavalues[j]), 
+                    weight='bold', va='center', ha='center',
+                    size=18, fontname='serif', color='w')
+
+    ax.set_ylim(min(x[0])-w/2, max(x[0])+w/2)
+    ax.invert_yaxis()
+    ax.set_xticks(range(0, 21, 5), fontfamily='serif', minor=False)
+    ax.set_xticks(range(0, 21, 1), fontfamily='serif', minor=True)
+    ax.tick_params('x', labelsize='large')
+    ax.set_yticks(ticks = x[i], labels=df_teams['team'][i::2], size=18, fontfamily='serif')
+    ax.set_xlim(0, df_teams['total'].max())
 
 
-### Legend plot
+handles, labels = ax.get_legend_handles_labels()
+fig.legend(handles, labels, loc='upper center', ncol=4, bbox_to_anchor=(0.5, 0.05),
+           prop={'family': "serif", 'size':'x-large', 'weight': 'bold'}, framealpha=0)
 
 
 
-# plt.savefig("test.png")
+fig.suptitle(f"Mets Current Season Series Progress\n{date.today()} ({won}-{lost}, {incomplete} GR)"
+             , size=24, weight='bold', fontname='serif', y=0.9, va='bottom')
+
+   
 plt.show()
