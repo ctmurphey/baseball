@@ -72,7 +72,6 @@ except:
 nicknames = [] ## Adding city names crowds up the labels too much
 for i,t in enumerate(df_teams['team']):
     if t.split()[-1] == "Sox": #Accounting for Boston/Chicago Sox
-    if t.split()[-1] == "Sox": #Accounting for Boston/Chicago Sox
         nicknames.append(f"{t.split()[-2]+ ' ' + t.split()[-1] } ({team_rec[i]})")
     else:
         nicknames.append(f"{t.split()[-1]} ({team_rec[i]})")
