@@ -61,12 +61,13 @@ for index, row in df_sch.iterrows():
     df_teams.loc[df_teams['team']==row['other_team'], ['total']] += 1  
 
 # get divisions for teams:
-divs = ['ALE', 'ALC', 'ALW', 'NLE', 'NLC', 'NLW'] #order pbb prints standings
+divs = ['ALE', 'ALC', 'ALW', 'NLE', 'NLC', 'NLW'] #order that pbb prints standings
 
 ### Preseason messes up pybaseball.standings:
 try:
     standings = pd.concat(pbb.standings(), ignore_index=True)
-    team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-{standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
+    team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-\
+                {standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
 except:
     standings = pd.concat(pbb.standings(2022), ignore_index=True)
     team_rec = ["0-0" for team in df_teams['team']]
@@ -88,7 +89,7 @@ df_teams['div'] = pd.Categorical(df_teams['div'], ["NLE", "NLC", "NLW", "ALE", "
 ### Order for the teams to be plotted in, consistent throughout the season
 df_teams.sort_values(['div', 'team'], ascending=[True, True], inplace=True, ignore_index=True)
 
-
+# Tallying total season results actross all teams
 won, lost, incomplete, total, inc_home, inc_away = df_teams.sum(numeric_only=True).values
 won = round(won)
 lost = round(lost)
@@ -178,7 +179,8 @@ for i in range(2):
                     size=18, fontname='serif')
             
         if away.datavalues[j] != 0:
-            ax.text(wins.datavalues[j] + losses.datavalues[j] + home.datavalues[j] + away.datavalues[j]/2, x[i][j], int(away.datavalues[j]), 
+            ax.text(wins.datavalues[j] + losses.datavalues[j] + home.datavalues[j]\
+                     + away.datavalues[j]/2, x[i][j], int(away.datavalues[j]), 
                     weight='bold', va='center', ha='center',
                     size=18, fontname='serif', color='w')
 
@@ -200,6 +202,5 @@ fig.legend(handles, labels, loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.
 
 fig.suptitle(f"Mets Current Season Series Progress\n{date.today()} ({won}-{lost}, {incomplete} GR)"
              , size=24, weight='bold', fontname='serif', y=0.9, va='bottom')
-# plt.axis('scaled')   
 fig.tight_layout()
 plt.show()
