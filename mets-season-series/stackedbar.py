@@ -87,7 +87,7 @@ df_teams['div'] = pd.Categorical(df_teams['div'], ["NLE", "NLC", "NLW", "ALE", "
 
 
 ### Order for the teams to be plotted in, consistent throughout the season
-df_teams.sort_values(['div', 'team'], ascending=[True, True], inplace=True, ignore_index=True)
+df_teams.sort_values(['div', 'total', 'team'], ascending=[True, False, True], inplace=True, ignore_index=True)
 
 # Tallying total season results actross all teams
 won, lost, incomplete, total, inc_home, inc_away = df_teams.sum(numeric_only=True).values
