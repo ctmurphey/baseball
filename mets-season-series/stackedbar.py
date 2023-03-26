@@ -41,7 +41,6 @@ df_teams['inc_away'] = np.zeros(len(team_set))
 
 
 
-
 ### Not optimal method, should optimize to list comprehension in future version
 for index, row in df_sch.iterrows():
     if row['status'] == 'Scheduled':
@@ -50,6 +49,7 @@ for index, row in df_sch.iterrows():
             df_teams.loc[df_teams['team']==row['other_team'], ['inc_home']] += 1
         else:
             df_teams.loc[df_teams['team']==row['other_team'], ['inc_away']] += 1
+
 
 
     elif row['winning_team'] == 'New York Mets':
