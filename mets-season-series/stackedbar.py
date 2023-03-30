@@ -66,8 +66,7 @@ divs = ['ALE', 'ALC', 'ALW', 'NLE', 'NLC', 'NLW'] #order that pbb prints standin
 ### Preseason messes up pybaseball.standings:
 try:
     standings = pd.concat(pbb.standings(), ignore_index=True)
-    team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-\
-                {standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
+    team_rec = [f"{standings.loc[standings['Tm']==team, ['W']].values[0][0]}-{standings.loc[standings['Tm']==team, ['L']].values[0][0]}" for team in df_teams['team']]
 except:
     standings = pd.concat(pbb.standings(2022), ignore_index=True)
     team_rec = ["0-0" for team in df_teams['team']]
