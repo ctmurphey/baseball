@@ -98,7 +98,7 @@ incomplete_away = round(inc_away)
 
 
 ### Trying new way due to 50% more teams:
-fig = plt.figure(tight_layout=True)
+fig = plt.figure(tight_layout=True, figsize=(12.75, 7))
 gs = gridspec.GridSpec(2, 2, height_ratios=[1,12], width_ratios=[13,3])
 
 w = 0.9 #main bar width
@@ -202,4 +202,5 @@ fig.legend(handles, labels, loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.
 fig.suptitle(f"Mets Current Season Series Progress\n{date.today()} ({won}-{lost}, {incomplete} GR)"
              , size=24, weight='bold', fontname='serif', y=0.9, va='bottom')
 fig.tight_layout()
-plt.show()
+plt.savefig("test.jpg")
+# plt.show()
